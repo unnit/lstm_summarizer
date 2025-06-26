@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-text: #6b7280;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #f8fafc 0%, #e0f2fe 100%);
+            overflow: hidden;
+        }
+
+        .animated-background::before,
+        .animated-background::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.1));
+            animation: float 20s infinite linear;
+        }
+
+        .animated-background::before {
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+
+        .animated-background::after {
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -10s;
+        }
+
+        .floating-shape {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(37, 99, 235, 0.05), rgba(59, 130, 246, 0.05));
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: morph 15s infinite linear;
+        }
+
+        .floating-shape:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+
+        .floating-shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(100px, 100px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-50px, 200px) rotate(240deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        @keyframes morph {
+            0% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+            25% {
+                border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+            }
+            50% {
+                border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+            }
+            75% {
+                border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+            }
+            100% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .ad-container {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: fit-content;
+            position: sticky;
+            top: 5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .summary-type {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .icon-button {
+            flex: 1;
+            min-width: 60px;
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .icon-button:hover {
+            background: var(--background);
+            border-color: var(--primary-color);
+        }
+
+        .icon-button.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+
+        .icon-button img {
+            width: 24px;
+            height: 24px;
+            transition: filter 0.3s;
+            border-radius: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        button.primary:hover {
+            background: var(--secondary-color);
+        }
+
+        button.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .result-container {
+            margin-top: 2rem;
+        }
+
+        .result-box {
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--background);
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #result {
+            white-space: pre-wrap;
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--light-text);
+        }
+
+        .copy-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s;
+        }
+
+        .copy-button:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .copy-button i {
+            font-size: 1.25rem;
+        }
+
+        .copy-success {
+            color: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .ad-container {
+                width: 100%;
+                position: static;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .content-container {
+                padding: 1.5rem;
+            }
+
+            .summary-type {
+                gap: 0.5rem;
+            }
+
+            .icon-button {
+                min-width: 50px;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-background">
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+    </div>
+    
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <i class="fas fa-file-alt"></i>
+                Text Summarizer
+            </a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="content-container">
+            <h1>Summarize Your Text</h1>
+            <textarea id="inputText" placeholder="Enter your text here."></textarea>
+            
+            <div class="summary-type">
+                <button class="icon-button" onclick="changeSummaryType('paragraph')" title="Single Paragraph">
+                    <img src="{{ url_for('static', filename='icons/paragraph.png') }}" alt="Single Paragraph">
+                </button>
+                <button class="icon-button" onclick="changeSummaryType('two_paragraphs')" title="Two Paragraphs">
+                    <img src="{{ url_for('static', filename='icons/two-paragraph.png') }}" alt="Two Paragraphs">
+                </button>
+                <button class="icon-button" onclick="changeSummaryType('paragraph_bullet')" title="Paragraph + Bullets">
+                    <img src="{{ url_for('static', filename='icons/paragrah-bullet.png') }}" alt="Paragraph + Bullets">
+                </button>
+                <button class="icon-button" onclick="changeSummaryType('bullets')" title="Bullet Points">
+                    <img src="{{ url_for('static', filename='icons/bullet.png') }}" alt="Bullet Points">
+                </button>
+            </div>
+            
+            <div class="button-group">
+                <button class="primary" onclick="summarize()">
+                    <i class="fas fa-magic"></i>
+                    Summarize
+                </button>
+                <button class="danger" onclick="clearText()">
+                    <i class="fas fa-trash"></i>
+                    Clear
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner fa-spin"></i> Summarizing... Please wait...
+            </div>
+            
+            <div class="result-container">
+                <div class="result-box">
+                    <div class="result-title">
+                        <span>Summary</span>
+                        <button class="copy-button" onclick="copySummary()" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div id="result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'paragraph';
+        
+        function changeSummaryType(type) {
+            currentType = type;
+            // Update button styles
+            document.querySelectorAll('.icon-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.icon-button').classList.add('active');
+        }
+        
+        async function summarize() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                alert('Please enter some text to summarize');
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            result.textContent = ''; // Clear previous result
+            
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        type: currentType
+                    })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    result.textContent = data.summary;
+                } else {
+                    let errorMessage = data.error;
+                    if (response.status === 429) {
+                        errorMessage = 'Rate limit exceeded. Please try again later or upgrade your plan.';
+                    } else if (response.status === 400) {
+                        errorMessage = 'Invalid request. Please check your input text.';
+                    } else if (response.status === 401) {
+                        errorMessage = 'API configuration error. Please contact support.';
+                    }
+                    result.innerHTML = `<div style="color: #ef4444; padding: 1rem; background: #fee2e2; border-radius: 0.5rem; margin-top: 1rem;">
+                        <i class="fas fa-exclamation-circle"></i> ${errorMessage}
+                    </div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div style="color: #ef4444; padding: 1rem; background: #fee2e2; border-radius: 0.5rem; margin-top: 1rem;">
+                    <i class="fas fa-exclamation-circle"></i> Network error. Please check your internet connection and try again.
+                </div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('result').textContent = '';
+        }
+        
+        async function copySummary() {
+            const result = document.getElementById('result');
+            const copyButton = document.querySelector('.copy-button i');
+            
+            if (!result.textContent.trim()) {
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(result.textContent);
+                
+                // Visual feedback
+                copyButton.classList.remove('fa-copy');
+                copyButton.classList.add('fa-check');
+                copyButton.parentElement.classList.add('copy-success');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyButton.classList.remove('fa-check');
+                    copyButton.classList.add('fa-copy');
+                    copyButton.parentElement.classList.remove('copy-success');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+        
+        // Set initial active button
+        document.querySelector('.icon-button').classList.add('active');
+    </script>
+</body>
+</html> 
